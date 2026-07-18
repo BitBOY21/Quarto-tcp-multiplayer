@@ -2,6 +2,7 @@ package client.network;
 
 import java.io.*;
 import java.net.*;
+import javafx.application.Platform;
 
 /**
  * TCPClient manages the connection between a client and the server.
@@ -76,7 +77,7 @@ public class TCPClient {
 
             case "startOnlineGameMyTurn":
                 if (gameSessionListener != null) {
-                    gameSessionListener.startOnlineGameAcourdingToMyTurne(true);
+                    Platform.runLater(() -> gameSessionListener.startOnlineGameAcourdingToMyTurne(true));
                 }
                 break;
 
@@ -84,7 +85,7 @@ public class TCPClient {
             case "startOnlineGameWait":
                 System.out.println("Server: " + data);
                 if (gameSessionListener != null) {
-                    gameSessionListener.startOnlineGameAcourdingToMyTurne(false);
+                    Platform.runLater(() -> gameSessionListener.startOnlineGameAcourdingToMyTurne(false));
                 }
                 break;
 
@@ -94,7 +95,7 @@ public class TCPClient {
                     int row = Integer.parseInt(tokens[0]);
                     int col = Integer.parseInt(tokens[1]);
                     if (gameSessionListener != null) {
-                        gameSessionListener.opponentPlacedPiece(row, col);
+                        Platform.runLater(() -> gameSessionListener.opponentPlacedPiece(row, col));
                     }
                 } catch (Exception ex) {
                     System.err.println("Error processing movePlace: " + ex.getMessage());
@@ -105,7 +106,7 @@ public class TCPClient {
                 try {
                     int pieceId = Integer.parseInt(data.trim());
                     if (gameSessionListener != null) {
-                        gameSessionListener.opponentChosePiece(pieceId);
+                        Platform.runLater(() -> gameSessionListener.opponentChosePiece(pieceId));
                     }
                 } catch (Exception ex) {
                     System.err.println("Error processing moveChoose: " + ex.getMessage());
@@ -137,7 +138,7 @@ public class TCPClient {
                 hasHandledOpponentLeft = true;
 
                 System.out.println("Your opponent has left the game.");
-                javafx.application.Platform.runLater(() -> {
+                Platform.runLater(() -> {
                     if (gameSessionListener instanceof client.controllers.GameEngine engine) {
                         engine.setOpponentDisconnected(true);
                         engine.opponentQuitAndYouWon(); // 🆕 מבצע את כל הטיפול
@@ -147,7 +148,7 @@ public class TCPClient {
 
             case "chat":
                 if (chatListener != null) {
-                    chatListener.accept(data);
+                    Platform.runLater(() -> chatListener.accept(data));
                 }
                 break;
 

@@ -17,7 +17,7 @@ The engine provides a polished graphical interface for both local and network pl
 
 | Main Menu | Online Matchmaking |
 | :---: | :---: |
-| ![Main Menu](images/main-menu.png) | ![Online Mode](images/online-mode.png) |
+| ![Main Menu](images/Main-Menu.png) | ![Online Mode](images/Online-Mode.png) |
 
 ## 🏗️ Architecture Overview
 

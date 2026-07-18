@@ -2,6 +2,7 @@ package server;
 
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.locks.ReentrantLock;
 import client.models.Player;
 import server.db.DBHelper;
 import java.util.List;
@@ -14,6 +15,7 @@ public class TCPServer {
 
     private static final int port = 1234;
     private static ClientHandler waitingClient = null;     // Holds a single client waiting to be matched
+    private static final ReentrantLock lock = new ReentrantLock(true);
 
     public static void main(String[] args) {
         new TCPServer().startServer();
@@ -138,14 +140,18 @@ public class TCPServer {
                     if (this.username == null && parts.length >= 2) {
                         this.username = parts[1];
                     }
-
-                    if (waitingClient == null || waitingClient.equals(this)) {
-                        waitingClient = this;
-                        output.println("startOnlineGameWait Waiting for opponent...");
-                    } else {
-                        ClientHandler opponentClient = this;
-                        startSession(waitingClient, opponentClient);
-                        waitingClient = null;
+                    lock.lock();
+                    try {
+                        if (waitingClient == null || waitingClient.equals(this)) {
+                            waitingClient = this;
+                            output.println("startOnlineGameWait Waiting for opponent...");
+                        } else {
+                            ClientHandler opponentClient = this;
+                            startSession(waitingClient, opponentClient);
+                            waitingClient = null;
+                        }
+                    } finally {
+                        lock.unlock();
                     }
                     break;
 
@@ -258,7 +264,14 @@ public class TCPServer {
         private void closeConnection() {
             try {
                 System.out.println("Closing connection for " + username);
-                if (this == waitingClient) waitingClient = null;
+                lock.lock();
+                try {
+                    if (this == waitingClient) {
+                        waitingClient = null;
+                    }
+                } finally {
+                    lock.unlock();
+                }
 
 
                 if (opponent != null) {
